@@ -30,7 +30,7 @@ function App() {
   useEffect(() => {
     const getPins = async () => {
       try {
-        const res = await axios.get(`${process.env.REACT_APP_API_BASE_URL}/api/pins`);
+        const res = await axios.get('http://16.16.60.18/api/pins');
         console.log('API response:', res.data); 
         setPins(res.data)
       } catch (err) {
@@ -70,7 +70,7 @@ function App() {
     }
 
     try {
-      const res = await axios.post(`${process.env.REACT_APP_API_BASE_URL}/api/pins`, newPin);
+      const res = await axios.post('http://16.16.60.18/api/pins', newPin);
       setPins([...pins, res.data]);
       setNewPlace(null);
     } catch (err) {
