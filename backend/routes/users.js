@@ -31,16 +31,29 @@ router.post("/register", async (req, res) => {
 
 //login
 router.post("/login", async (req, res)=> {
-    // find user
-    const user = await User.findOne({username: req.body.username});
-    !user && res.status(400).json("Wrong username or password!");
+    try {
+        // find user
+        const user = await User.findOne({username: req.body.username});
+        
+        // check user and return error if not found
+        if (!user) {
+            return res.status(400).json("Wrong username or password!");
+        }
 
-    // validate password
-    const validPwd = await bcrypt.compare(req.body.password, user.password)
-    ! validPwd && res.status(400).json("Wrong username or password!");
+        // validate password
+        const validPwd = await bcrypt.compare(req.body.password, user.password);
+        
+        if (!validPwd) {
+            return res.status(400).json("Wrong username or password!");
+        }
 
-    // send response
-    res.status(200).json({_id: user._id, username: user.username})
-})
+        // send response
+        res.status(200).json({_id: user._id, username: user.username});
+
+    } catch (err) {
+        res.status(500).json(err);
+    }
+});
+
 
 module.exports = router;

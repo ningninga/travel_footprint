@@ -1,4 +1,6 @@
 import ReactMapGL, { Marker, Popup } from 'react-map-gl';
+import mapboxgl from "mapbox-gl"; // This is a dependency of react-map-gl even if you didn't explicitly install it
+
 import * as React from 'react';
 import { Room, Star } from '@material-ui/icons';
 import "./App.css";
@@ -8,6 +10,9 @@ import { useState, useEffect } from 'react';
 import Register from "./components/Register";
 import Login from "./components/Login"
 
+
+// eslint-disable-next-line import/no-webpack-loader-syntax
+mapboxgl.workerClass = require("worker-loader!mapbox-gl/dist/mapbox-gl-csp-worker").default;
 function App() {
   const myStorage = window.localStorage;
   const [viewport, setViewport] = useState({
@@ -31,7 +36,6 @@ function App() {
     const getPins = async () => {
       try {
         const res = await axios.get('http://16.16.60.18/api/pins');
-        console.log('API response:', res.data); 
         setPins(res.data)
       } catch (err) {
         console.log(err)
