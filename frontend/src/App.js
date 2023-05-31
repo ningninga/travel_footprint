@@ -6,7 +6,8 @@ import axios from "axios";
 import { format } from "timeago.js"
 import { useState, useEffect } from 'react';
 import Register from "./components/Register";
-import Login from "./components/Login"
+import Login from "./components/Login";
+import Alert from '@material-ui/lab/Alert';
 
 function App() {
   const myStorage = window.localStorage;
@@ -27,11 +28,11 @@ function App() {
   const [showRegister, setShowRegister] = useState(false);
   const [showLogin, setShowLogin] = useState(false);
 
+
   useEffect(() => {
     const getPins = async () => {
       try {
-        const res = await axios.get('http://16.16.60.18/api/pins');
-        console.log('API response:', res.data); 
+        const res = await axios.get('/pins');
         setPins(res.data)
       } catch (err) {
         console.log(err)
@@ -70,7 +71,7 @@ function App() {
     }
 
     try {
-      const res = await axios.post('http://16.16.60.18/api/pins', newPin);
+      const res = await axios.post('/pins', newPin);
       setPins([...pins, res.data]);
       setNewPlace(null);
     } catch (err) {
@@ -81,12 +82,16 @@ function App() {
   const handleLogout = () => {
     myStorage.removeItem("user");
     setCurrentUsername(null);
-     
+
   };
 
   return (
 
     <div className="App" style={{ height: "100vh", width: "100%" }}>
+      {alertTimeout && 
+        <Alert className="alert-timeout" severity="error">
+          'You have been logged out due to inactivity'
+        </Alert>}
 
       <ReactMapGL
         {...viewport}
@@ -180,12 +185,15 @@ function App() {
             </Popup>
           </>
         )}
-        {currentUsername ? (<button className='button logout' onClick={handleLogout}>Log out</button>) : (<div className='buttons'>
-          <button className='button login' onClick={() => {setShowLogin(true); setShowRegister(false);}}>Login</button>
-          <button className='button register' onClick={() => {setShowRegister(true); setShowLogin(false)}}>Register</button>
-        </div>)}
-        {showRegister && <Register setShowRegister={setShowRegister}/>}
-        {showLogin && <Login setShowLogin={setShowLogin}  setCurrentUsername={setCurrentUsername} myStorage={myStorage}/>}
+        {currentUsername ? (<div className="buttonContianer">
+                              <button className='button greeting-hi'>Hi {currentUsername}</button> 
+                              <button className='button logout' onClick={handleLogout}>Log out</button> 
+                           </div>) : (<div className='buttons'>
+            <button className='button login' onClick={() => { setShowLogin(true); setShowRegister(false); }}>Login</button>
+            <button className='button register' onClick={() => { setShowRegister(true); setShowLogin(false) }}>Register</button>
+          </div>)}
+        {showRegister && <Register setShowRegister={setShowRegister} />}
+        {showLogin && <Login setShowLogin={setShowLogin} setCurrentUsername={setCurrentUsername} myStorage={myStorage} />}
       </ReactMapGL>;
     </div >
   );
