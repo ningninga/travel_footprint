@@ -27,6 +27,7 @@ function App() {
   const [star, setStar] = useState(0);
   const [showRegister, setShowRegister] = useState(false);
   const [showLogin, setShowLogin] = useState(false);
+  const [alertTimeout, setAlertTimeout] = useState(false);
 
 
   useEffect(() => {
@@ -193,7 +194,14 @@ function App() {
             <button className='button register' onClick={() => { setShowRegister(true); setShowLogin(false) }}>Register</button>
           </div>)}
         {showRegister && <Register setShowRegister={setShowRegister} />}
-        {showLogin && <Login setShowLogin={setShowLogin} setCurrentUsername={setCurrentUsername} myStorage={myStorage} />}
+        {showLogin && <Login setShowLogin={setShowLogin} setCurrentUsername={setCurrentUsername} myStorage={myStorage} setAlertTimeout={setAlertTimeout} />}
+        {alertTimeout && 
+        <div className="alert-container">
+          <Alert className="alert-timeout" severity="error">
+          'You have been logged out due to inactivity'
+        </Alert>
+        </div>
+        }
       </ReactMapGL>;
     </div >
   );

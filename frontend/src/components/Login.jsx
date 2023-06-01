@@ -37,7 +37,7 @@ export default function Login({ setShowLogin, setCurrentUsername, myStorage, set
                 setTimeout(() => {
                     setAlertTimeout(false);
                 }, 2000);
-            }, 10000); // one hour
+            }, 60 * 60 * 1000); // one hour
 
             setLogoutTimeoutId(newLogoutTimeoutId);
 

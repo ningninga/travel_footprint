@@ -111,7 +111,17 @@ input::placeholder, textarea::placeholder {
     margin-top: 10px;
 }
 
+.alert-container{
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    position: fixed;
+    z-index: 9999;
+    width: 100%;
+    height: 100vh;
+    background: rgba(0,0,0,0.5);
+}
 .alert-timeout{
-    z-index: 1000;
-    position: absolute;
+    max-width: 500px;
+    width: 100%;
 }
