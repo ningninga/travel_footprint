@@ -32,7 +32,7 @@ function App() {
   const [showImageModal, setShowImageModal] = useState(false);
   const [currentImage, setCurrentImage] = useState("");
   const [selectedFile, setSelectedFile] = useState(null);
-
+  const [loginAlert, setLoginAlert] = useState(false);
 
 
 
@@ -47,6 +47,7 @@ function App() {
     };
     getPins();
   }, []);
+
   const handleMarkerClick = (id, lat, long) => {
     setCurrentPlaceId(id);
     setViewport(prevState => ({
@@ -56,16 +57,28 @@ function App() {
     }));
   }
 
+  // Double click the map, if the user has not logged in, open the login form.
   const hanleAddClick = (e) => {
     console.log(e.lngLat);
     const lat = e.lngLat.lat;
     const long = e.lngLat.lng;
+    if (currentUsername) {
+      setNewPlace({
+        lat: lat,
+        long: long,
+      });
+    }
+    else {
+      setLoginAlert(true);
+      setTimeout(() => {
+        setLoginAlert(false);
+        setShowLogin(true);
+    }, 1000);
+    }
 
-    setNewPlace({
-      lat: lat,
-      long: long,
-    });
   }
+
+  // After user fill the form, send a post request
   const handleSubmit = async (e) => {
     e.preventDefault();
     const newPin = {
@@ -90,7 +103,7 @@ function App() {
       console.log(err)
     }
   }
-
+  
   const handleLogout = () => {
     myStorage.removeItem("user");
     setCurrentUsername(null);
@@ -105,11 +118,6 @@ function App() {
   return (
 
     <div className="App" style={{ height: "100vh", width: "100%" }}>
-      {alertTimeout &&
-        <Alert className="alert-timeout" severity="error">
-          'You have been logged out due to inactivity'
-        </Alert>}
-
       <ReactMapGL
         {...viewport}
         width="100%"
@@ -119,8 +127,12 @@ function App() {
         onMove={(viewport) => setViewport(viewport)}
         onDblClick={hanleAddClick}
         transitionDuration="2000"
-
       >
+        {loginAlert && <div className="alert-container">
+            <Alert className="alert-timeout" severity="error">
+              'You have to login to create your own pins'
+            </Alert>
+          </div>}
 
         {pins.map((p) => (
           <>
