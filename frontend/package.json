@@ -20,7 +20,8 @@
     "react-map-gl": "^7.0.23",
     "react-scripts": "5.0.1",
     "timeago.js": "^4.0.2",
-    "web-vitals": "^2.1.4"
+    "web-vitals": "^2.1.4",
+    "worker-loader": "^3.0.8"
   },
   "scripts": {
     "start": "GENERATE_SOURCEMAP=false && react-scripts start",
@@ -46,5 +47,5 @@
       "last 1 safari version"
     ]
   },
-  "proxy": "http://16.16.60.18:8800/api"
+  "proxy": "http://localhost:8800/api"
 }
