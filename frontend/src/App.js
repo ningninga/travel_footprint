@@ -8,6 +8,7 @@ import { useState, useEffect } from 'react';
 import Register from "./components/Register";
 import Login from "./components/Login";
 import Alert from '@material-ui/lab/Alert';
+import ImageModal from './components/ImageModal';
 
 function App() {
   const myStorage = window.localStorage;
@@ -28,13 +29,18 @@ function App() {
   const [showRegister, setShowRegister] = useState(false);
   const [showLogin, setShowLogin] = useState(false);
   const [alertTimeout, setAlertTimeout] = useState(false);
+  const [showImageModal, setShowImageModal] = useState(false);
+  const [currentImage, setCurrentImage] = useState("");
+  const [selectedFile, setSelectedFile] = useState(null);
+
+
 
 
   useEffect(() => {
     const getPins = async () => {
       try {
         const res = await axios.get('/pins');
-        setPins(res.data)
+        setPins(res.data);
       } catch (err) {
         console.log(err)
       }
@@ -51,7 +57,7 @@ function App() {
   }
 
   const hanleAddClick = (e) => {
-    console.log(e)
+    console.log(e.lngLat);
     const lat = e.lngLat.lat;
     const long = e.lngLat.lng;
 
@@ -69,10 +75,15 @@ function App() {
       rating: star,
       lat: newPlace.lat,
       long: newPlace.long,
+      imageUrl: selectedFile
     }
 
     try {
-      const res = await axios.post('/pins', newPin);
+      const res = await axios.post('/pins', newPin, {
+        headers: {
+          'Content-Type': 'multipart/form-data'
+        }
+      });
       setPins([...pins, res.data]);
       setNewPlace(null);
     } catch (err) {
@@ -86,10 +97,15 @@ function App() {
 
   };
 
+  const handleImageClick = (imgSrc) => {
+    setCurrentImage(imgSrc);
+    setShowImageModal(true);
+  };
+
   return (
 
     <div className="App" style={{ height: "100vh", width: "100%" }}>
-      {alertTimeout && 
+      {alertTimeout &&
         <Alert className="alert-timeout" severity="error">
           'You have been logged out due to inactivity'
         </Alert>}
@@ -125,7 +141,15 @@ function App() {
                 closeButton={true}
                 closeOnClick={false}
                 onClose={() => setCurrentPlaceId(null)}>
-                <div className='card'>
+                <div className={p.imageUrl ? 'card' : 'card-no-image'}>
+                  {p.imageUrl &&
+                    <img
+                      className="image"
+                      src={p.imageUrl}
+                      onClick={() => handleImageClick(p.imageUrl)}
+                      alt={p.title}
+                    />}
+
                   <label>Place</label>
                   <h4 className='place'>{p.title}</h4>
                   <label>Review</label>
@@ -168,6 +192,8 @@ function App() {
               onClose={() => setNewPlace(null)}>
               <div>
                 <form onSubmit={handleSubmit}>
+                  <label>Select A Photo</label>
+                  <input type='file' onChange={(e) => setSelectedFile(e.target.files[0])} />
                   <label>Title</label>
                   <input placeholder='Enter a title' onChange={(e) => setTitle(e.target.value)} />
                   <label>Review</label>
@@ -187,22 +213,28 @@ function App() {
           </>
         )}
         {currentUsername ? (<div className="buttonContianer">
-                              <button className='button greeting-hi'>Hi {currentUsername}</button> 
-                              <button className='button logout' onClick={handleLogout}>Log out</button> 
-                           </div>) : (<div className='buttons'>
-            <button className='button login' onClick={() => { setShowLogin(true); setShowRegister(false); }}>Login</button>
-            <button className='button register' onClick={() => { setShowRegister(true); setShowLogin(false) }}>Register</button>
-          </div>)}
+          <button className='button greeting-hi'>Hi {currentUsername}</button>
+          <button className='button logout' onClick={handleLogout}>Log out</button>
+        </div>) : (<div className='buttons'>
+          <button className='button login' onClick={() => { setShowLogin(true); setShowRegister(false); }}>Login</button>
+          <button className='button register' onClick={() => { setShowRegister(true); setShowLogin(false) }}>Register</button>
+        </div>)}
         {showRegister && <Register setShowRegister={setShowRegister} />}
         {showLogin && <Login setShowLogin={setShowLogin} setCurrentUsername={setCurrentUsername} myStorage={myStorage} setAlertTimeout={setAlertTimeout} />}
-        {alertTimeout && 
-        <div className="alert-container">
-          <Alert className="alert-timeout" severity="error">
-          'You have been logged out due to inactivity'
-        </Alert>
-        </div>
+        {alertTimeout &&
+          <div className="alert-container">
+            <Alert className="alert-timeout" severity="error">
+              'You have been logged out due to inactivity'
+            </Alert>
+          </div>
         }
+        <ImageModal
+          showModal={showImageModal}
+          imageSrc={currentImage}
+          hideModal={() => setShowImageModal(false)}
+        />
       </ReactMapGL>;
+
     </div >
   );
 }

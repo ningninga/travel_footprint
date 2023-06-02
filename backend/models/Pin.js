@@ -28,6 +28,10 @@ const PinSchema = new mongoose.Schema({
     long: {
         type: Number,
         require: true
+    },
+    imageUrl: {
+        type: String,
+        require: false
     }
 
 },

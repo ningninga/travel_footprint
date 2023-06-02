@@ -10,6 +10,8 @@ dotenv.config();
 
 app.use(express.json());
 
+
+
 app.use(cors());
 
 
@@ -24,6 +26,7 @@ app.use(cors());
 app.use("/api/pins", pinRoute);
 app.use("/api/users", userRoute);
 
+app.use('/api/uploads', express.static('uploads'));
 app.listen(8800, () => {
   console.log("Backend server is running!");
 });
