@@ -1,5 +1,12 @@
 .card {
     width: 200px;
+    height: 370px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-around;
+}
+.card-no-image{
+    width: 200px;
     height: 250px;
     display: flex;
     flex-direction: column;
@@ -14,6 +21,11 @@ label {
     margin: 3px 0;
 }
 
+.image {
+    /* margin-left: 10px; */
+    margin-top: 10px;
+
+}
 .place  {
     font-size: 14px;
 }
@@ -53,6 +65,7 @@ input::placeholder, textarea::placeholder {
 }
 
 .submitButton{
+    margin-top: 6px;
     border: none;
     padding: 5px;
     border-radius: 5px;
