@@ -1,6 +1,4 @@
 import ReactMapGL, { Marker, Popup } from 'react-map-gl';
-import mapboxgl from "mapbox-gl"; // This is a dependency of react-map-gl even if you didn't explicitly install it
-
 import * as React from 'react';
 import { Room, Star } from '@material-ui/icons';
 import "./App.css";
@@ -8,11 +6,10 @@ import axios from "axios";
 import { format } from "timeago.js"
 import { useState, useEffect } from 'react';
 import Register from "./components/Register";
-import Login from "./components/Login"
+import Login from "./components/Login";
+import Alert from '@material-ui/lab/Alert';
+import ImageModal from './components/ImageModal';
 
-
-// eslint-disable-next-line import/no-webpack-loader-syntax
-mapboxgl.workerClass = require("worker-loader!mapbox-gl/dist/mapbox-gl-csp-worker").default;
 function App() {
   const myStorage = window.localStorage;
   const [viewport, setViewport] = useState({
@@ -31,18 +28,26 @@ function App() {
   const [star, setStar] = useState(0);
   const [showRegister, setShowRegister] = useState(false);
   const [showLogin, setShowLogin] = useState(false);
+  const [alertTimeout, setAlertTimeout] = useState(false);
+  const [showImageModal, setShowImageModal] = useState(false);
+  const [currentImage, setCurrentImage] = useState("");
+  const [selectedFile, setSelectedFile] = useState(null);
+  const [loginAlert, setLoginAlert] = useState(false);
+
+
 
   useEffect(() => {
     const getPins = async () => {
       try {
-        const res = await axios.get('http://16.16.60.18/api/pins');
-        setPins(res.data)
+        const res = await axios.get('/pins');
+        setPins(res.data);
       } catch (err) {
         console.log(err)
       }
     };
     getPins();
   }, []);
+
   const handleMarkerClick = (id, lat, long) => {
     setCurrentPlaceId(id);
     setViewport(prevState => ({
@@ -52,16 +57,28 @@ function App() {
     }));
   }
 
+  // Double click the map, if the user has not logged in, open the login form.
   const hanleAddClick = (e) => {
-    console.log(e)
+    console.log(e.lngLat);
     const lat = e.lngLat.lat;
     const long = e.lngLat.lng;
+    if (currentUsername) {
+      setNewPlace({
+        lat: lat,
+        long: long,
+      });
+    }
+    else {
+      setLoginAlert(true);
+      setTimeout(() => {
+        setLoginAlert(false);
+        setShowLogin(true);
+    }, 1000);
+    }
 
-    setNewPlace({
-      lat: lat,
-      long: long,
-    });
   }
+
+  // After user fill the form, send a post request
   const handleSubmit = async (e) => {
     e.preventDefault();
     const newPin = {
@@ -71,27 +88,36 @@ function App() {
       rating: star,
       lat: newPlace.lat,
       long: newPlace.long,
+      imageUrl: selectedFile
     }
 
     try {
-      const res = await axios.post('http://16.16.60.18/api/pins', newPin);
+      const res = await axios.post('/pins', newPin, {
+        headers: {
+          'Content-Type': 'multipart/form-data'
+        }
+      });
       setPins([...pins, res.data]);
       setNewPlace(null);
     } catch (err) {
       console.log(err)
     }
   }
-
+  
   const handleLogout = () => {
     myStorage.removeItem("user");
     setCurrentUsername(null);
-     
+
+  };
+
+  const handleImageClick = (imgSrc) => {
+    setCurrentImage(imgSrc);
+    setShowImageModal(true);
   };
 
   return (
 
     <div className="App" style={{ height: "100vh", width: "100%" }}>
-
       <ReactMapGL
         {...viewport}
         width="100%"
@@ -101,8 +127,12 @@ function App() {
         onMove={(viewport) => setViewport(viewport)}
         onDblClick={hanleAddClick}
         transitionDuration="2000"
-
       >
+        {loginAlert && <div className="alert-container">
+            <Alert className="alert-timeout" severity="error">
+              'You have to login to create your own pins'
+            </Alert>
+          </div>}
 
         {pins.map((p) => (
           <>
@@ -123,7 +153,15 @@ function App() {
                 closeButton={true}
                 closeOnClick={false}
                 onClose={() => setCurrentPlaceId(null)}>
-                <div className='card'>
+                <div className={p.imageUrl ? 'card' : 'card-no-image'}>
+                  {p.imageUrl &&
+                    <img
+                      className="image"
+                      src={p.imageUrl}
+                      onClick={() => handleImageClick(p.imageUrl)}
+                      alt={p.title}
+                    />}
+
                   <label>Place</label>
                   <h4 className='place'>{p.title}</h4>
                   <label>Review</label>
@@ -166,6 +204,8 @@ function App() {
               onClose={() => setNewPlace(null)}>
               <div>
                 <form onSubmit={handleSubmit}>
+                  <label>Select A Photo</label>
+                  <input type='file' onChange={(e) => setSelectedFile(e.target.files[0])} />
                   <label>Title</label>
                   <input placeholder='Enter a title' onChange={(e) => setTitle(e.target.value)} />
                   <label>Review</label>
@@ -184,13 +224,29 @@ function App() {
             </Popup>
           </>
         )}
-        {currentUsername ? (<button className='button logout' onClick={handleLogout}>Log out</button>) : (<div className='buttons'>
-          <button className='button login' onClick={() => {setShowLogin(true); setShowRegister(false);}}>Login</button>
-          <button className='button register' onClick={() => {setShowRegister(true); setShowLogin(false)}}>Register</button>
+        {currentUsername ? (<div className="buttonContianer">
+          <button className='button greeting-hi'>Hi {currentUsername}</button>
+          <button className='button logout' onClick={handleLogout}>Log out</button>
+        </div>) : (<div className='buttons'>
+          <button className='button login' onClick={() => { setShowLogin(true); setShowRegister(false); }}>Login</button>
+          <button className='button register' onClick={() => { setShowRegister(true); setShowLogin(false) }}>Register</button>
         </div>)}
-        {showRegister && <Register setShowRegister={setShowRegister}/>}
-        {showLogin && <Login setShowLogin={setShowLogin}  setCurrentUsername={setCurrentUsername} myStorage={myStorage}/>}
+        {showRegister && <Register setShowRegister={setShowRegister} />}
+        {showLogin && <Login setShowLogin={setShowLogin} setCurrentUsername={setCurrentUsername} myStorage={myStorage} setAlertTimeout={setAlertTimeout} />}
+        {alertTimeout &&
+          <div className="alert-container">
+            <Alert className="alert-timeout" severity="error">
+              'You have been logged out due to inactivity'
+            </Alert>
+          </div>
+        }
+        <ImageModal
+          showModal={showImageModal}
+          imageSrc={currentImage}
+          hideModal={() => setShowImageModal(false)}
+        />
       </ReactMapGL>;
+
     </div >
   );
 }
