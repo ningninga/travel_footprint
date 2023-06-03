@@ -1,0 +1,22 @@
+body {
+    margin: 0;
+    padding: 0;
+    height: 100vh;
+    overflow: hidden;
+  }
+  
+.navbar-content {
+    display: flex;
+    justify-content:space-between;
+    width: 100%;
+}
+  
+.nav-right {
+    margin-left: auto;
+}
+
+.nav-username{
+    margin-left: 30px;
+    margin-right: 30px;
+    color: aliceblue;
+}

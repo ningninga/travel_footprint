@@ -22,8 +22,10 @@ label {
 }
 
 .image {
-    /* margin-left: 10px; */
+    margin-left: 10px;
     margin-top: 10px;
+    width: 180px;
+    height: auto;
 
 }
 .place  {
