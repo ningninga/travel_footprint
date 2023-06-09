@@ -32,6 +32,11 @@ const PinSchema = new mongoose.Schema({
     imageUrl: {
         type: String,
         require: false
+    },
+    deleteAt: {
+        type: Date,
+        require: false,
+        default: null
     }
 
 },

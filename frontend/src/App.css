@@ -4,6 +4,7 @@
     display: flex;
     flex-direction: column;
     justify-content: space-around;
+    border: none;
 }
 .card-no-image{
     width: 200px;
@@ -25,7 +26,7 @@ label {
     margin-left: 10px;
     margin-top: 10px;
     width: 180px;
-    height: auto;
+    height: 110px;
 
 }
 .place  {
@@ -136,7 +137,14 @@ input::placeholder, textarea::placeholder {
     height: 100vh;
     background: rgba(0,0,0,0.5);
 }
-.alert-timeout{
+.alert-timeout,
+.alert-login,
+.alert-delete-success,
+.alert-logout-success
+.alert-update-successt{
     max-width: 500px;
     width: 100%;
+}
+.deletebtn {
+    width: 40%;
 }
